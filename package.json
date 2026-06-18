@@ -1,0 +1,27 @@
+{
+  "name": "techstore",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "pnpm --filter @techstore/db migrate",
+    "db:studio": "pnpm --filter @techstore/db studio",
+    "db:seed": "pnpm --filter @techstore/db seed",
+    "db:seed:demo": "pnpm --filter @techstore/db seed:demo"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@11.6.0"
+}

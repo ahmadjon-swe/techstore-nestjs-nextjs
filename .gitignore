@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+.turbo/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Uploads / local files
+uploads/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+packages/db/generated/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Personal docs (private runbook, not committed)
+RUNBOOK.md
+AI-BRIEF.md
+SPEC.md

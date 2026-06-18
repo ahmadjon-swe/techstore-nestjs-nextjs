@@ -1,0 +1,28 @@
+# Dependencies & build artifacts (rebuilt inside the image)
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+
+# Secrets & local env — never bake into an image layer
+**/.env
+**/.env.*
+!**/.env.example
+
+# VCS / CI / editor
+.git
+.github
+.gitignore
+**/.vscode
+**/.idea
+
+# Local-only files
+**/*.log
+uploads/
+RUNBOOK.md
+repomix-output.*
+
+# OS
+**/.DS_Store
+**/Thumbs.db

@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Users & Auth ----------
+
+enum Role {
+  OWNER
+  MANAGER
+  STAFF
+  CUSTOMER
+}
+
+model User {
+  id           String    @id @default(cuid())
+  phone        String?   @unique
+  email        String?   @unique
+  passwordHash String?
+  name         String?
+  role         Role      @default(CUSTOMER)
+  telegramId   BigInt?   @unique
+  locale       String    @default("uz")
+  addresses    Address[]
+  orders       Order[]
+  cart         Cart?
+  reviews      Review[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Address {
+  id        String  @id @default(cuid())
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  label     String?
+  line1     String
+  line2     String?
+  city      String
+  region    String?
+  notes     String?
+  isDefault Boolean @default(false)
+
+  @@map("addresses")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+// ---------- Catalog ----------
+
+model Category {
+  id       String     @id @default(cuid())
+  slug     String     @unique
+  nameUz   String
+  nameRu   String
+  nameEn   String
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  parentId String?
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  logoUrl  String?
+  products Product[]
+
+  @@map("brands")
+}
+
+enum Condition {
+  NEW
+  USED
+}
+
+enum UsedGrade {
+  A
+  B
+  C
+}
+
+model Product {
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  titleUz        String
+  titleRu        String
+  titleEn        String
+  descriptionUz  String?
+  descriptionRu  String?
+  descriptionEn  String?
+  category       Category         @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  brand          Brand?           @relation(fields: [brandId], references: [id])
+  brandId        String?
+  condition      Condition        @default(NEW)
+  grade          UsedGrade?
+  conditionNotes String?
+  batteryHealth  Int?
+  isPublished    Boolean          @default(false)
+  variants       ProductVariant[]
+  images         ProductImage[]
+  reviews        Review[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id           String      @id @default(cuid())
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId    String
+  sku          String      @unique
+  storage      String?
+  color        String?
+  attributes   Json?
+  priceUzs     BigInt
+  compareAtUzs BigInt?
+  stock        Int         @default(0)
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  url       String
+  alt       String?
+  position  Int     @default(0)
+
+  @@map("product_images")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  rating    Int
+  body      String?
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
+}
+
+// ---------- Cart ----------
+
+model Cart {
+  id        String     @id @default(cuid())
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String     @unique
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String         @id @default(cuid())
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  variantId String
+  quantity  Int            @default(1)
+
+  @@unique([cartId, variantId])
+  @@map("cart_items")
+}
+
+// ---------- Orders & Payments ----------
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  PAYME
+  CLICK
+  CASH
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  number    String      @unique
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  status    OrderStatus @default(PENDING)
+  items     OrderItem[]
+  payment   Payment?
+  totalUzs  BigInt
+  address   Json?
+  source    String      @default("web")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String         @id @default(cuid())
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  variantId String
+  titleSnap String
+  priceUzs  BigInt
+  quantity  Int
+
+  @@map("order_items")
+}
+
+model Payment {
+  id          String          @id @default(cuid())
+  order       Order           @relation(fields: [orderId], references: [id])
+  orderId     String          @unique
+  provider    PaymentProvider
+  status      PaymentStatus   @default(INITIATED)
+  amountUzs   BigInt
+  providerRef String?
+  rawPayload  Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("payments")
+}

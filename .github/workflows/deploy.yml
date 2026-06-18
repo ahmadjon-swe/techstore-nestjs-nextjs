@@ -1,0 +1,118 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/techstore
+
+jobs:
+  build-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: production
+          push: true
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${{ steps.vars.outputs.sha_short }}
+
+      - name: Build & push Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          target: production
+          push: true
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:${{ steps.vars.outputs.sha_short }}
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build-push
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: 'docker-compose.prod.yml,nginx/'
+          target: '/srv/techstore'
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /srv/techstore
+
+            # Pull new images
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.build-push.outputs.sha_short }}
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:${{ needs.build-push.outputs.sha_short }}
+
+            # Tag as latest
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.build-push.outputs.sha_short }} techstore-api:deploy
+            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:${{ needs.build-push.outputs.sha_short }} techstore-web:deploy
+
+            # Run migrations before swapping containers
+            docker run --rm \
+              --env-file /srv/techstore/.env.production \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.build-push.outputs.sha_short }} \
+              node -e "require('@techstore/db').prisma.migrate.deploy()" \
+              || \
+              docker compose -f docker-compose.prod.yml run --rm api \
+                pnpm --filter @techstore/db migrate:deploy
+
+            # Swap with zero-downtime (rolling update via docker compose)
+            docker compose -f docker-compose.prod.yml up -d --build --wait --no-build \
+              --pull never
+
+            # Health check
+            sleep 5
+            curl -fsk http://127.0.0.1:4000/api/health || (docker compose -f docker-compose.prod.yml logs api && exit 1)
+
+            # Prune old images
+            docker image prune -f
