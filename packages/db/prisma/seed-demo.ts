@@ -34,6 +34,8 @@ type Details = {
 };
 
 async function main() {
+  // Guard: skip in production. To seed the VPS database, use:
+  //   pnpm db:seed:demo:prod   (sets NODE_ENV=development for this run only)
   if (process.env.NODE_ENV === 'production') {
     console.log('Refusing to run demo seed in production.');
     return;

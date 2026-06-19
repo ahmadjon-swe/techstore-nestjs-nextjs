@@ -17,7 +17,9 @@
     "generate": "prisma generate",
     "studio": "prisma studio",
     "seed": "ts-node --project tsconfig.json prisma/seed.ts",
+    "seed:prod": "NODE_ENV=development ts-node --project tsconfig.json prisma/seed.ts",
     "seed:demo": "ts-node --project tsconfig.json prisma/seed-demo.ts",
+    "seed:demo:prod": "NODE_ENV=development ts-node --project tsconfig.json prisma/seed-demo.ts",
     "seed:images": "ts-node --project tsconfig.json prisma/seed-images.ts",
     "db:generate": "prisma generate"
   },

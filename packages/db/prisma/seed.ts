@@ -10,6 +10,8 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Guard: skip silently in production. To seed the VPS database, use:
+  //   pnpm db:seed:prod   (sets NODE_ENV=development for this run only)
   if (process.env.NODE_ENV === 'production') return;
 
   // Categories
