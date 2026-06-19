@@ -23,6 +23,8 @@ CMD ["pnpm", "--filter", "@techstore/api", "start:dev"]
 FROM deps AS builder
 COPY . .
 RUN pnpm --filter @techstore/db db:generate
+RUN pnpm --filter @techstore/types build
+RUN pnpm --filter @techstore/db build
 RUN pnpm --filter @techstore/api build
 
 # ---- production ----
