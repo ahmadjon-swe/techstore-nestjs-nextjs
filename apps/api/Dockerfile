@@ -30,6 +30,11 @@ RUN pnpm --filter @techstore/api build
 # ---- production ----
 FROM node:22-alpine AS production
 # tini = proper PID 1 (signal handling / zombie reaping); curl for HEALTHCHECK
+# COREPACK_HOME must be set BEFORE corepack prepare so the cache lands in a
+# world-readable location — the container runs as the unprivileged 'node' user
+# and cannot access root's default cache (~root/.cache), which causes Corepack
+# to re-download pnpm on every docker exec call (wasting memory + network).
+ENV COREPACK_HOME=/usr/local/share/corepack
 RUN apk add --no-cache tini curl && corepack enable && corepack prepare pnpm@11.6.0 --activate
 WORKDIR /app
 ENV NODE_ENV=production
