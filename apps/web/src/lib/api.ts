@@ -1,4 +1,7 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API_URL =
+  typeof window === 'undefined'
+    ? (process.env.INTERNAL_API_URL ?? 'http://techstore-api-1:4000')
+    : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000');
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
