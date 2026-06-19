@@ -130,6 +130,9 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter @techstore/db db:generate
 
+      - name: Build @techstore/db
+        run: pnpm --filter @techstore/db build
+
       - name: Run migrations
         run: pnpm --filter @techstore/db migrate:deploy
 
