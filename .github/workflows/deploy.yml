@@ -78,11 +78,12 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}-api:latest
             docker pull ghcr.io/${{ github.repository }}-web:latest
 
-            # No --no-deps: Compose respects depends_on so DB starts/stays healthy
-            # before API, which needs it for the entrypoint migration.
-            docker compose -f docker-compose.prod.yml up -d --no-build api web nginx
+            # Declarative bring-up: Compose starts db, waits until healthy
+            # (depends_on: service_healthy), then api (entrypoint runs the Prisma
+            # migration against a reachable db), then web + nginx.
+            docker compose -f docker-compose.prod.yml up -d --no-build
 
-            # Wait up to 120s for the stack to be reachable.
+            # Wait up to 120s for the stack to answer through nginx.
             for i in $(seq 1 24); do
               if curl -fsS http://127.0.0.1:3110/api/health 2>/dev/null; then
                 break

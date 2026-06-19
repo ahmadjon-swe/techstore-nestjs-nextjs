@@ -15,9 +15,8 @@ services:
       - techstore_db_data:/var/lib/postgresql/data
     expose:
       - '5432'
-    # Bind to 127.0.0.1 only, port 5433 to avoid conflict with any host postgres
-    ports:
-      - '127.0.0.1:5433:5432'
+    # No host port publish — the API reaches Postgres over the techstore-network
+    # at db:5432. For manual access: docker exec -it techstore-db-1 psql -U techstore
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U techstore -d techstore']
       interval: 10s
