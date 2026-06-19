@@ -78,19 +78,9 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}-api:latest
             docker pull ghcr.io/${{ github.repository }}-web:latest
 
-            # Start API first (db must already be healthy from a previous deploy or
-            # initial setup); run migrations before web/nginx to keep memory low.
-            docker compose -f docker-compose.prod.yml up -d --no-deps --no-build api
+            docker compose -f docker-compose.prod.yml up -d --no-deps --no-build api web nginx
 
-            until docker inspect --format='{{.State.Health.Status}}' techstore-db-1 2>/dev/null | grep -q "healthy"; do
-              sleep 3
-            done
-            docker exec techstore-api-1 pnpm --filter @techstore/db migrate:deploy
-
-            # Bring up the rest of the stack once migrations are done.
-            docker compose -f docker-compose.prod.yml up -d --no-deps --no-build web nginx
-
-            sleep 5
+            sleep 15
             curl -fsS http://127.0.0.1:3110/api/health \
               || (docker compose -f docker-compose.prod.yml logs --tail 50 api && exit 1)
 
