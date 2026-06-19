@@ -73,6 +73,10 @@ jobs:
             set -e
             cd /opt/techstore
 
+            # Preflight: fail fast with a readable message instead of a cryptic
+            # compose error if the server was never bootstrapped.
+            test -f /opt/techstore/.env || { echo "::error::/opt/techstore/.env missing — run scripts/vps-bootstrap.sh on the VPS"; exit 1; }
+
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             docker pull ghcr.io/${{ github.repository }}-api:latest

@@ -49,6 +49,11 @@ RUN pnpm install --frozen-lockfile --prod
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/packages/db ./packages/db
 
+# The fresh --prod install above reinstalls @prisma/client as the ungenerated
+# stub, so the generated client (with enum runtime values like OrderStatus) must
+# be regenerated here — otherwise those enums are undefined at runtime.
+RUN pnpm --filter @techstore/db db:generate
+
 COPY apps/api/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
