@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { ShoppingBag, Check } from 'lucide-react';
 import { useCartUI } from '@/store/cart';
+import { useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 
 export function QuickAdd({ variantId, disabled }: { variantId: string; disabled?: boolean }) {
+  const { t } = useT();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const bump = useCartUI((s) => s.bump);
@@ -18,7 +20,7 @@ export function QuickAdd({ variantId, disabled }: { variantId: string; disabled?
     e.stopPropagation();
     if (disabled || loading) return;
     setLoading(true);
-    bump(1); // optimistic
+    bump(1);
     try {
       const res = await fetch('/api/cart/add', {
         method: 'POST',
@@ -27,21 +29,21 @@ export function QuickAdd({ variantId, disabled }: { variantId: string; disabled?
       });
       if (res.status === 401) {
         bump(-1);
-        toast.error('Please sign in to add items');
+        toast.error(t('detail.signInToAdd'));
         router.push('/auth/login');
         return;
       }
       if (!res.ok) {
         bump(-1);
-        toast.error('Could not add to cart');
+        toast.error(t('common.error'));
         return;
       }
       setDone(true);
-      toast.success('Added to cart');
+      toast.success(t('detail.addedToCart'));
       setTimeout(() => setDone(false), 1600);
     } catch {
       bump(-1);
-      toast.error('Network error');
+      toast.error(t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,7 @@ export function QuickAdd({ variantId, disabled }: { variantId: string; disabled?
       )}
     >
       {done ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
-      {disabled ? 'Sold out' : done ? 'Added' : 'Quick add'}
+      {disabled ? t('common.soldOut') : done ? t('detail.added') : t('detail.quickAdd')}
     </button>
   );
 }

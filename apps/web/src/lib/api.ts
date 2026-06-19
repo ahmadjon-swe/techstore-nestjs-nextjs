@@ -64,6 +64,14 @@ export interface ProductDetail extends ProductSummary {
   descriptionEn: string | null;
   conditionNotes: string | null;
   batteryHealth: number | null;
+  releaseYear: number | null;
+  modelName: string | null;
+  mpn: string | null;
+  warrantyMonths: number | null;
+  weightGrams: number | null;
+  highlights: string[];
+  /** Grouped spec sheet: { "Display": { "Size": "6.7\"", ... }, ... } */
+  specs: Record<string, Record<string, string>> | null;
   reviews: Review[];
 }
 
@@ -88,7 +96,7 @@ export interface Category {
   nameUz: string;
   nameRu: string;
   nameEn: string;
-  children: Category[];
+  children?: Category[];
 }
 
 export interface Brand {
@@ -98,6 +106,8 @@ export interface Brand {
   logoUrl: string | null;
 }
 
+export type ProductSort = 'newest' | 'price-asc' | 'price-desc' | 'discount';
+
 export type CatalogFilters = {
   categorySlug?: string;
   brandSlug?: string;
@@ -105,9 +115,16 @@ export type CatalogFilters = {
   minPrice?: string;
   maxPrice?: string;
   search?: string;
+  sort?: ProductSort;
+  onSale?: boolean;
   page?: number;
   limit?: number;
 };
+
+export interface HomeSection {
+  category: { id: string; slug: string; nameUz: string; nameRu: string; nameEn: string };
+  products: ProductSummary[];
+}
 
 export function buildCatalogUrl(filters: CatalogFilters): string {
   const params = new URLSearchParams();
@@ -117,6 +134,8 @@ export function buildCatalogUrl(filters: CatalogFilters): string {
   if (filters.minPrice) params.set('minPrice', filters.minPrice);
   if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
   if (filters.search) params.set('search', filters.search);
+  if (filters.sort) params.set('sort', filters.sort);
+  if (filters.onSale) params.set('onSale', 'true');
   if (filters.page && filters.page > 1) params.set('page', String(filters.page));
   if (filters.limit) params.set('limit', String(filters.limit));
   const q = params.toString();
@@ -128,10 +147,36 @@ export const catalog = {
     request<CatalogResponse>(buildCatalogUrl(filters), { next: { revalidate: 60 } }),
   get: (slug: string): Promise<ProductDetail> =>
     request<ProductDetail>(`/api/catalog/products/${slug}`, { next: { revalidate: 60 } }),
+  related: (slug: string): Promise<ProductSummary[]> =>
+    request<ProductSummary[]>(`/api/catalog/products/${slug}/related`, { next: { revalidate: 120 } }),
+  discounted: (limit = 12): Promise<ProductSummary[]> =>
+    request<ProductSummary[]>(`/api/catalog/discounted?limit=${limit}`, { next: { revalidate: 60 } }),
+  newArrivals: (limit = 12): Promise<ProductSummary[]> =>
+    request<ProductSummary[]>(`/api/catalog/new-arrivals?limit=${limit}`, { next: { revalidate: 60 } }),
+  homeSections: (): Promise<HomeSection[]> =>
+    request<HomeSection[]>('/api/catalog/home-sections', { next: { revalidate: 60 } }),
   categories: (): Promise<Category[]> =>
     request<Category[]>('/api/catalog/categories', { next: { revalidate: 300 } }),
+  navCategories: (): Promise<Category[]> =>
+    request<Category[]>('/api/catalog/nav-categories', { next: { revalidate: 120 } }),
   brands: (): Promise<Brand[]> =>
     request<Brand[]>('/api/catalog/brands', { next: { revalidate: 300 } }),
+};
+
+// ── Wishlist ─────────────────────────────────────────────────────────────────
+
+export interface WishlistEntry extends ProductSummary {
+  wishlistId: string;
+  savedAt: string;
+}
+
+export const wishlist = {
+  list: (token: string): Promise<WishlistEntry[]> =>
+    request<WishlistEntry[]>('/api/wishlist', { cache: 'no-store' }, token),
+  ids: (token: string): Promise<string[]> =>
+    request<string[]>('/api/wishlist/ids', { cache: 'no-store' }, token),
+  toggle: (token: string, productId: string): Promise<{ saved: boolean }> =>
+    request<{ saved: boolean }>(`/api/wishlist/${productId}/toggle`, { method: 'POST' }, token),
 };
 
 // ── Cart ───────────────────────────────────────────────────────────────────
@@ -173,13 +218,18 @@ export interface Order {
   payment: { provider: string; status: string } | null;
 }
 
+// Alias used by list pages that only need summary fields
+export type OrderSummary = Order;
+
 export const orders = {
   list: (token: string): Promise<{ items: Order[]; total: number }> =>
-    request('/api/orders', {}, token),
+    request('/api/orders', { cache: 'no-store' }, token),
   get: (token: string, id: string): Promise<Order> =>
-    request(`/api/orders/${id}`, {}, token),
+    request(`/api/orders/${id}`, { cache: 'no-store' }, token),
   create: (token: string, body: { addressId?: string; address?: object; paymentProvider: string }): Promise<Order> =>
     request('/api/orders', { method: 'POST', body: JSON.stringify(body) }, token),
+  cancel: (token: string, id: string): Promise<Order> =>
+    request(`/api/orders/${id}/cancel`, { method: 'POST' }, token),
 };
 
 // ── Payments ───────────────────────────────────────────────────────────────
@@ -198,6 +248,8 @@ export interface UserProfile {
   phone: string | null;
   role: string;
   locale: string;
+  hasPassword?: boolean;
+  isGoogleLinked?: boolean;
 }
 
 export interface Address {
@@ -209,13 +261,17 @@ export interface Address {
   region: string | null;
   notes: string | null;
   isDefault: boolean;
+  lat: number | null;
+  lng: number | null;
 }
 
 export const users = {
   profile: (token: string): Promise<UserProfile> =>
-    request('/api/users/me', {}, token),
+    request('/api/users/me', { cache: 'no-store' }, token),
   updateProfile: (token: string, data: Partial<UserProfile>): Promise<UserProfile> =>
     request('/api/users/me', { method: 'PATCH', body: JSON.stringify(data) }, token),
+  deleteAccount: (token: string): Promise<{ success: boolean }> =>
+    request('/api/users/me', { method: 'DELETE' }, token),
   addresses: (token: string): Promise<Address[]> =>
     request('/api/users/me/addresses', {}, token),
   createAddress: (token: string, data: object): Promise<Address> =>

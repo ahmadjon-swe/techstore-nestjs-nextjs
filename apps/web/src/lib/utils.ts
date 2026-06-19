@@ -2,7 +2,10 @@ export type Locale = 'uz' | 'ru' | 'en';
 
 export function formatPrice(uzs: string | number | bigint): string {
   const n = typeof uzs === 'string' ? parseInt(uzs, 10) : Number(uzs);
-  return new Intl.NumberFormat('uz-UZ', { style: 'decimal' }).format(n) + ' so\'m';
+  // Manual formatter avoids Intl.NumberFormat locale differences between Node.js ICU and browsers
+  // (Node uses space separator, Chrome uses comma for uz-UZ → hydration mismatch).
+  const formatted = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return `${formatted} so'm`;
 }
 
 export function pickLocale<T extends { titleUz: string; titleRu: string; titleEn: string }>(

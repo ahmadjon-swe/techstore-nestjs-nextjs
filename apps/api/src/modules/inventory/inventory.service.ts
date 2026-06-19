@@ -17,10 +17,11 @@ export class InventoryService {
   ) {}
 
   async createProduct(dto: CreateProductDto) {
-    const { variants, ...productData } = dto;
+    const { variants, specs, ...productData } = dto;
     return this.prisma.product.create({
       data: {
         ...productData,
+        specs: specs === undefined ? undefined : (specs as object),
         variants: {
           create: variants.map((v) => ({
             sku: v.sku,
@@ -60,7 +61,11 @@ export class InventoryService {
 
   async updateProduct(id: string, dto: UpdateProductDto) {
     await this.getProduct(id);
-    return this.prisma.product.update({ where: { id }, data: dto });
+    const { specs, ...rest } = dto;
+    return this.prisma.product.update({
+      where: { id },
+      data: { ...rest, specs: specs === undefined ? undefined : (specs as object) },
+    });
   }
 
   async deleteProduct(id: string) {

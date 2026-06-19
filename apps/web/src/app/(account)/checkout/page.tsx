@@ -9,9 +9,10 @@ export const metadata: Metadata = { title: 'Checkout' };
 
 export default async function CheckoutPage() {
   const token = await requireAuth();
-  const [cartData, addresses] = await Promise.all([
+  const [cartData, addresses, profile] = await Promise.all([
     cart.get(token).catch(() => null),
     users.addresses(token).catch(() => []),
+    users.profile(token).catch(() => null),
   ]);
 
   if (!cartData || cartData.items.length === 0) redirect('/cart');
@@ -39,7 +40,12 @@ export default async function CheckoutPage() {
         </div>
       </div>
 
-      <CheckoutForm addresses={addresses} providers={Object.keys(PAYMENT_PROVIDER_LABELS)} providerLabels={PAYMENT_PROVIDER_LABELS} />
+      <CheckoutForm
+        addresses={addresses}
+        currentPhone={profile?.phone ?? ''}
+        providers={Object.keys(PAYMENT_PROVIDER_LABELS)}
+        providerLabels={PAYMENT_PROVIDER_LABELS}
+      />
     </div>
   );
 }

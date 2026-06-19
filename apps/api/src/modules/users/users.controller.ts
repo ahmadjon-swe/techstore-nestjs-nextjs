@@ -23,6 +23,11 @@ export class UsersController {
     return this.usersService.updateProfile(user.id, dto);
   }
 
+  @Delete('me')
+  deleteAccount(@CurrentUser() user: any) {
+    return this.usersService.deleteAccount(user.id);
+  }
+
   @Get('me/addresses')
   getAddresses(@CurrentUser() user: any) {
     return this.usersService.getAddresses(user.id);

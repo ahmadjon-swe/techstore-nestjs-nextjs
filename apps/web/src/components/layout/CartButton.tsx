@@ -1,32 +1,31 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { m, AnimatePresence } from 'framer-motion';
 import { ShoppingBag } from 'lucide-react';
 import { useCartUI } from '@/store/cart';
+import { useT } from '@/lib/i18n';
 
 export function CartButton() {
+  const { t } = useT();
   const count = useCartUI((s) => s.count);
-  const open = useCartUI((s) => s.open);
   const setCount = useCartUI((s) => s.setCount);
 
-  // Hydrate the badge from the server cart once on mount.
   useEffect(() => {
     let alive = true;
     fetch('/api/cart/count')
       .then((r) => (r.ok ? r.json() : { count: 0 }))
       .then((d) => alive && setCount(d.count ?? 0))
       .catch(() => {});
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [setCount]);
 
   return (
-    <button
-      onClick={open}
-      aria-label={`Cart (${count} items)`}
-      className="relative grid h-10 w-10 place-items-center rounded-full text-muted hover:bg-white/5 hover:text-fg"
+    <Link
+      href="/cart"
+      aria-label={`${t('nav.cart')} (${count})`}
+      className="relative grid h-10 w-10 place-items-center rounded-full text-muted hover:bg-fg/5 hover:text-fg"
     >
       <ShoppingBag className="h-[18px] w-[18px]" />
       <AnimatePresence>
@@ -43,6 +42,6 @@ export function CartButton() {
           </m.span>
         )}
       </AnimatePresence>
-    </button>
+    </Link>
   );
 }

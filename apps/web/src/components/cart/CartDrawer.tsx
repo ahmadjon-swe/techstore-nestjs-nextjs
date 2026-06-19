@@ -7,12 +7,14 @@ import { m, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Minus, Plus, Trash2 } from 'lucide-react';
 import { useCartUI } from '@/store/cart';
 import { formatPrice } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 import type { Cart } from '@/lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 const img = (u?: string) => (u ? (u.startsWith('http') ? u : `${API_URL}${u}`) : null);
 
 export function CartDrawer() {
+  const { t } = useT();
   const isOpen = useCartUI((s) => s.isOpen);
   const close = useCartUI((s) => s.close);
   const setCount = useCartUI((s) => s.setCount);
@@ -77,11 +79,11 @@ export function CartDrawer() {
           >
             <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
-                <ShoppingBag className="h-5 w-5 text-accent-2" /> Your cart
+                <ShoppingBag className="h-5 w-5 text-accent-2" /> {t('cart.title')}
               </h2>
               <button
                 onClick={close}
-                className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-white/5 hover:text-fg"
+                className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-fg/5 hover:text-fg"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -89,19 +91,19 @@ export function CartDrawer() {
 
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {loading && items.length === 0 ? (
-                <p className="py-12 text-center text-sm text-muted">Loading…</p>
+                <p className="py-12 text-center text-sm text-muted">{t('common.loading')}</p>
               ) : items.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-                  <div className="grid h-16 w-16 place-items-center rounded-full border border-line bg-white/5">
+                  <div className="grid h-16 w-16 place-items-center rounded-full border border-line bg-fg/5">
                     <ShoppingBag className="h-7 w-7 text-faint" />
                   </div>
-                  <p className="text-muted">Your cart is empty.</p>
+                  <p className="text-muted">{t('cart.empty')}</p>
                   <Link
                     href="/catalog"
                     onClick={close}
-                    className="rounded-full bg-white/5 px-5 py-2 text-sm text-fg hover:bg-white/10"
+                    className="rounded-full bg-fg/5 px-5 py-2 text-sm text-fg hover:bg-fg/10"
                   >
-                    Browse products
+                    {t('cart.browse')}
                   </Link>
                 </div>
               ) : (
@@ -128,14 +130,14 @@ export function CartDrawer() {
                           <div className="mt-1.5 flex items-center gap-2">
                             <button
                               onClick={() => setQty(item.variantId, item.quantity - 1)}
-                              className="grid h-6 w-6 place-items-center rounded-md border border-line hover:bg-white/5"
+                              className="grid h-6 w-6 place-items-center rounded-md border border-line hover:bg-fg/5"
                             >
                               <Minus className="h-3 w-3" />
                             </button>
                             <span className="w-5 text-center text-sm tabular-nums">{item.quantity}</span>
                             <button
                               onClick={() => setQty(item.variantId, item.quantity + 1)}
-                              className="grid h-6 w-6 place-items-center rounded-md border border-line hover:bg-white/5"
+                              className="grid h-6 w-6 place-items-center rounded-md border border-line hover:bg-fg/5"
                             >
                               <Plus className="h-3 w-3" />
                             </button>
@@ -157,7 +159,7 @@ export function CartDrawer() {
             {items.length > 0 && (
               <div className="border-t border-line px-6 py-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="text-sm text-muted">Subtotal</span>
+                  <span className="text-sm text-muted">{t('cart.subtotal')}</span>
                   <span className="font-mono text-lg font-semibold">
                     {formatPrice(cart?.total ?? '0')}
                   </span>
@@ -167,7 +169,7 @@ export function CartDrawer() {
                   onClick={close}
                   className="flex h-12 w-full items-center justify-center rounded-full bg-[linear-gradient(110deg,var(--color-accent),var(--color-accent-2))] text-sm font-medium text-white shadow-[0_10px_40px_-10px_var(--color-accent)] transition-transform hover:-translate-y-0.5"
                 >
-                  Checkout
+                  {t('cart.checkout')}
                 </Link>
               </div>
             )}

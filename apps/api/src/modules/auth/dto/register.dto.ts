@@ -17,6 +17,11 @@ export class RegisterDto {
   @MinLength(8)
   password: string;
 
+  @ApiPropertyOptional({ description: 'Must match password' })
+  @IsOptional()
+  @IsString()
+  confirmPassword?: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

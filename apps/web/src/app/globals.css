@@ -9,30 +9,28 @@
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains);
 
-  /* Surfaces */
-  --color-bg:        #06070b;
-  --color-bg-2:      #090b11;
-  --color-surface:   #0d0f17;
-  --color-elevated:  #12151f;
-  --color-line:      #1d212e;
-  --color-line-soft: #161922;
+  /* Colors map to runtime vars so the whole app re-themes on a class toggle.
+     Defaults (in :root) are the dark flagship palette; .light overrides them. */
+  --color-bg:        var(--c-bg);
+  --color-bg-2:      var(--c-bg-2);
+  --color-surface:   var(--c-surface);
+  --color-elevated:  var(--c-elevated);
+  --color-line:      var(--c-line);
+  --color-line-soft: var(--c-line-soft);
 
-  /* Ink */
-  --color-fg:        #eef1f7;
-  --color-muted:     #9aa1b2;
-  --color-faint:     #5b6273;
+  --color-fg:        var(--c-fg);
+  --color-muted:     var(--c-muted);
+  --color-faint:     var(--c-faint);
 
-  /* Accents — electric indigo → cyan */
-  --color-accent:    #6e8bff;
-  --color-accent-2:  #34e3e8;
-  --color-accent-ink:#aebcff;
+  --color-accent:    var(--c-accent);
+  --color-accent-2:  var(--c-accent-2);
+  --color-accent-ink:var(--c-accent-ink);
 
-  /* Semantic */
-  --color-new:       #6e8bff;
-  --color-used:      #e0a24a;
-  --color-success:   #3fd6a0;
-  --color-danger:    #ff6b6b;
-  --color-warning:   #f5c451;
+  --color-new:       var(--c-new);
+  --color-used:      var(--c-used);
+  --color-success:   var(--c-success);
+  --color-danger:    var(--c-danger);
+  --color-warning:   var(--c-warning);
 
   --radius-sm: 8px;
   --radius:    14px;
@@ -41,6 +39,34 @@
 }
 
 :root {
+  color-scheme: dark;
+
+  /* ── Dark flagship palette (default) ─────────────────────────────── */
+  --c-bg:        #06070b;
+  --c-bg-2:      #090b11;
+  --c-surface:   #0d0f17;
+  --c-elevated:  #12151f;
+  --c-line:      #1d212e;
+  --c-line-soft: #161922;
+
+  --c-fg:        #eef1f7;
+  --c-muted:     #9aa1b2;
+  --c-faint:     #5b6273;
+
+  --c-accent:    #6e8bff;
+  --c-accent-2:  #34e3e8;
+  --c-accent-ink:#aebcff;
+
+  --c-new:       #6e8bff;
+  --c-used:      #e0a24a;
+  --c-success:   #3fd6a0;
+  --c-danger:    #ff6b6b;
+  --c-warning:   #f5c451;
+
+  /* shadow strength for elevation (darker in dark mode) */
+  --shadow-strength: 0.9;
+  --sheen: rgba(255,255,255,0.06);
+
   /* Motion language */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -53,6 +79,51 @@
                  0 8px 40px -12px color-mix(in oklab, var(--color-accent) 55%, transparent);
 }
 
+/* ── Light palette — distinct surface layers, warm-cool mix, premium feel ── */
+.light {
+  color-scheme: light;
+
+  /* Page: slightly cool-warm tinted canvas — not pure white */
+  --c-bg:        #f2f4f9;
+  --c-bg-2:      #eaecf4;
+  /* Cards & panels sit 1 stop above the canvas */
+  --c-surface:   #ffffff;
+  /* Elevated elements (dropdowns, tooltips) get a very slight tint */
+  --c-elevated:  #f7f8fc;
+  /* Borders */
+  --c-line:      #dde1ed;
+  --c-line-soft: #e8ebf4;
+
+  /* Text hierarchy */
+  --c-fg:        #0c0e18;
+  --c-muted:     #4d5468;
+  --c-faint:     #8e95aa;
+
+  /* Brand accent — vivid indigo / teal */
+  --c-accent:    #4859f5;
+  --c-accent-2:  #08a5b5;
+  --c-accent-ink:#3040d4;
+
+  --c-new:       #4859f5;
+  --c-used:      #b8731c;
+  --c-success:   #0e8a5a;
+  --c-danger:    #d93040;
+  --c-warning:   #b07e00;
+
+  /* Light shadows are subtle — use box-shadow with low alpha */
+  --shadow-strength: 0.10;
+  --sheen: rgba(15,20,60,0.04);
+
+  /* In light mode, give bg-surface elements a subtle card shadow automatically */
+  .bg-surface {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 20px rgba(0,0,0,0.05);
+  }
+}
+
+/* Hide scrollbar but keep scrollability (used on the horizontal nav) */
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
 /* Registered custom props so gradients/angles can interpolate smoothly */
 @property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @property --shine { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
@@ -63,21 +134,21 @@
 
 html {
   background: var(--color-bg);
-  color-scheme: dark;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   background:
-    radial-gradient(1200px 600px at 80% -10%, color-mix(in oklab, var(--color-accent) 12%, transparent), transparent 60%),
-    radial-gradient(1000px 500px at -10% 10%, color-mix(in oklab, var(--color-accent-2) 8%, transparent), transparent 55%),
+    radial-gradient(1200px 600px at 80% -10%, color-mix(in oklab, var(--color-accent) 10%, transparent), transparent 60%),
+    radial-gradient(1000px 500px at -10% 10%, color-mix(in oklab, var(--color-accent-2) 7%, transparent), transparent 55%),
     var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  transition: background-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
 }
 
 h1, h2, h3, h4 {
@@ -92,6 +163,14 @@ h1, h2, h3, h4 {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+/* Inputs / textareas / selects get a border highlight instead of outline ring */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 1px var(--color-accent);
 }
 
 /* Sleek scrollbar */
@@ -122,13 +201,72 @@ h1, h2, h3, h4 {
 
 /* ------------------------------------------------------------- utilities --- */
 
-/* Frosted glass panel */
+/* Frosted glass panel — border keys off --color-fg so it reads in both themes */
 .glass {
   background: color-mix(in oklab, var(--color-surface) 70%, transparent);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid color-mix(in oklab, #fff 8%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-fg) 8%, transparent);
 }
+
+/* ── Header surface ─────────────────────────────────────────────────────────
+   Two states: default (at top, subtle tint) and scrolled (frosted glass).
+   Dark: near-black indigo tint. Light: clean white with warm-cool tint. */
+.header-default {
+  background: color-mix(in oklab, var(--color-bg) 94%, var(--color-accent) 6%);
+}
+.header-scrolled {
+  background: color-mix(in oklab, var(--color-surface) 82%, var(--color-accent) 4%);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* Mobile category menu — same tinted glass as header */
+.mobile-menu-surface {
+  background: color-mix(in oklab, var(--color-surface) 96%, var(--color-accent) 2%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+
+/* ── Right account sidebar ──────────────────────────────────────────────── */
+.sidebar-surface {
+  background: color-mix(in oklab, var(--color-surface) 97%, var(--color-accent) 2%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
+/* ── Footer surface ─────────────────────────────────────────────────────────
+   Always dark — contrasts with the page in both modes. */
+.footer-surface {
+  background: #070913;
+}
+.light .footer-surface {
+  background: #0e1220;
+}
+
+/* Premium card shadow — adapts to light/dark via --shadow-strength */
+.card-shadow {
+  box-shadow:
+    0 1px 3px rgba(0,0,0,calc(var(--shadow-strength) * 0.3)),
+    0 4px 16px rgba(0,0,0,calc(var(--shadow-strength) * 0.18));
+}
+/* Hover variant with a slight lift */
+.card-shadow-hover:hover {
+  box-shadow:
+    0 2px 8px rgba(0,0,0,calc(var(--shadow-strength) * 0.28)),
+    0 12px 40px rgba(0,0,0,calc(var(--shadow-strength) * 0.16));
+  transform: translateY(-1px);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+
+/* ---------------------------------------------------------------- Lenis ----
+   Required rules for the smooth-scroll engine — without these the page scroll
+   gets stuck and only the native scrollbar drag works. */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
 
 /* Animated conic-gradient border (uses interpolatable --angle) */
 .border-glow {

@@ -3,6 +3,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { ImageService } from './image.service';
+import { MinioService } from './minio.service';
 import { MediaController } from './media.controller';
 
 @Module({
@@ -17,8 +18,8 @@ import { MediaController } from './media.controller';
       ],
     }),
   ],
-  providers: [ImageService],
+  providers: [ImageService, MinioService],
   controllers: [MediaController],
-  exports: [ImageService],
+  exports: [ImageService, MinioService],
 })
 export class MediaModule {}

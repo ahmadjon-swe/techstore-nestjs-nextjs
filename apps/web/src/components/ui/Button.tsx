@@ -23,7 +23,7 @@ const variants: Record<Variant, string> = {
     'shadow-[0_8px_30px_-8px_color-mix(in_oklab,var(--color-accent)_70%,transparent)] ' +
     'hover:shadow-[0_12px_44px_-8px_color-mix(in_oklab,var(--color-accent)_85%,transparent)]',
   secondary: 'text-fg bg-elevated border border-line hover:border-faint hover:bg-[#161a26]',
-  ghost: 'text-muted hover:text-fg hover:bg-white/5',
+  ghost: 'text-muted hover:text-fg hover:bg-fg/5',
   outline: 'text-fg border border-line hover:border-accent/60 hover:text-accent-ink bg-transparent',
   danger: 'text-white bg-danger/90 hover:bg-danger',
 };

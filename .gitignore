@@ -31,6 +31,8 @@ packages/db/generated/
 npm-debug.log*
 
 # Personal docs (private runbook, not committed)
-RUNBOOK.md
+FRONTEND-TECHNIQUES.md
 AI-BRIEF.md
 SPEC.md
+VPS-CONTEXT.md
+DEPLOY.md

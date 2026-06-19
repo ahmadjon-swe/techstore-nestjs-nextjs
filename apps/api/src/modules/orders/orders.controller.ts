@@ -30,6 +30,11 @@ export class OrdersController {
     return this.ordersService.getOrder(id, user.id);
   }
 
+  @Post(':id/cancel')
+  cancelOrder(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.ordersService.cancelOrder(id, user.id);
+  }
+
   @UseGuards(RolesGuard)
   @Roles(Role.OWNER, Role.MANAGER, Role.STAFF)
   @Patch(':id/status')

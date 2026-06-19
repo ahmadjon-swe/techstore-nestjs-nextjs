@@ -34,6 +34,11 @@ export interface AdminOrder {
   user: { id: string; name: string | null; email: string | null; phone: string | null };
   items: { id: string; titleSnap: string; priceUzs: string; quantity: number }[];
   payment: { provider: string; status: string } | null;
+  address: {
+    id: string; line1: string; line2: string | null;
+    city: string; region: string | null; notes: string | null;
+    lat: number | null; lng: number | null;
+  } | null;
 }
 
 export interface LowStockVariant {
@@ -52,6 +57,17 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface AdminUserDetail extends AdminUser {
+  locale: string;
+  isGoogleLinked: boolean;
+  addresses: Array<{
+    id: string; label: string | null; line1: string; line2: string | null;
+    city: string; region: string | null; notes: string | null; isDefault: boolean;
+    lat: number | null; lng: number | null;
+  }>;
+  _count: { orders: number };
+}
+
 export const adminApi = {
   dashboard: (token: string): Promise<DashboardStats> =>
     adminRequest('/api/admin/dashboard', token),
@@ -64,6 +80,12 @@ export const adminApi = {
 
   users: (token: string): Promise<{ items: AdminUser[]; total: number }> =>
     adminRequest('/api/admin/users', token),
+
+  getUser: (token: string, id: string): Promise<AdminUserDetail> =>
+    adminRequest(`/api/admin/users/${id}`, token),
+
+  getUserOrders: (token: string, userId: string): Promise<{ items: AdminOrder[]; total: number }> =>
+    adminRequest(`/api/admin/users/${userId}/orders`, token),
 
   updateOrderStatus: (token: string, orderId: string, status: string): Promise<void> =>
     adminRequest(`/api/orders/${orderId}/status`, token, {

@@ -1,5 +1,10 @@
 version: '3.9'
 
+# VPS deployment — shares the host with CheckLab (ports 80/443 belong to CheckLab nginx).
+# Tech-store nginx listens on host port 3110 (HTTP only); SSL is terminated by the host proxy.
+# Host proxy must forward techstore.yourdomain.com → 127.0.0.1:3110
+# See DEPLOY.md for the full nginx server-block snippet.
+
 services:
   db:
     image: postgres:16-alpine
@@ -12,14 +17,17 @@ services:
       - techstore_db_data:/var/lib/postgresql/data
     expose:
       - '5432'
+    # Bind to 127.0.0.1 only, port 5433 to avoid conflict with any host postgres
     ports:
-      - '127.0.0.1:5432:5432'
+      - '127.0.0.1:5433:5432'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U techstore -d techstore']
       interval: 10s
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - techstore-network
 
   api:
     build:
@@ -35,14 +43,16 @@ services:
       NODE_ENV: production
     env_file:
       - .env.production
-    ports:
-      - '127.0.0.1:4000:4000'
+    expose:
+      - '4000'
     restart: unless-stopped
     healthcheck:
       test: ['CMD-SHELL', 'curl -fs http://localhost:4000/api/health || exit 1']
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - techstore-network
 
   web:
     build:
@@ -57,9 +67,11 @@ services:
       NEXT_PUBLIC_API_URL: ${API_URL}
     env_file:
       - .env.production
-    ports:
-      - '127.0.0.1:3000:3000'
+    expose:
+      - '3000'
     restart: unless-stopped
+    networks:
+      - techstore-network
 
   nginx:
     image: nginx:1.27-alpine
@@ -67,15 +79,21 @@ services:
     depends_on:
       - api
       - web
+    # Only port 3110 on localhost — host proxy (CheckLab nginx) forwards here.
+    # DO NOT add 80:80 or 443:443 — those belong to CheckLab.
     ports:
-      - '80:80'
-      - '443:443'
+      - '127.0.0.1:3110:80'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
       - techstore_uploads:/app/uploads:ro
     restart: unless-stopped
+    networks:
+      - techstore-network
 
 volumes:
   techstore_db_data:
   techstore_uploads:
+
+networks:
+  techstore-network:
+    driver: bridge

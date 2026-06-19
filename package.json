@@ -12,7 +12,8 @@
     "db:migrate": "pnpm --filter @techstore/db migrate",
     "db:studio": "pnpm --filter @techstore/db studio",
     "db:seed": "pnpm --filter @techstore/db seed",
-    "db:seed:demo": "pnpm --filter @techstore/db seed:demo"
+    "db:seed:demo": "pnpm --filter @techstore/db seed:demo",
+    "db:seed:images": "pnpm --filter @techstore/db seed:images"
   },
   "devDependencies": {
     "turbo": "^2.5.4",

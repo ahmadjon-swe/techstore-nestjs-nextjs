@@ -2,6 +2,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { SpecsEditor, specsToGroups, groupsToSpecs, type SpecGroup } from './SpecsEditor';
 
 interface ProductFormProps {
   product?: any;
@@ -24,12 +25,20 @@ export function ProductForm({ product, categories, brands }: ProductFormProps) {
     grade: product?.grade ?? 'B',
     conditionNotes: product?.conditionNotes ?? '',
     batteryHealth: product?.batteryHealth ?? '',
+    // Details & specs
+    releaseYear: product?.releaseYear ?? '',
+    modelName: product?.modelName ?? '',
+    mpn: product?.mpn ?? '',
+    warrantyMonths: product?.warrantyMonths ?? '',
+    weightGrams: product?.weightGrams ?? '',
+    highlights: (product?.highlights ?? []).join('\n'),
     // For new products, create first variant inline
     priceUzs: product?.variants?.[0]?.priceUzs ?? '',
     compareAtUzs: product?.variants?.[0]?.compareAtUzs ?? '',
     sku: product?.variants?.[0]?.sku ?? '',
     stock: product?.variants?.[0]?.stock ?? (condition === 'USED' ? 1 : 0),
   });
+  const [specGroups, setSpecGroups] = useState<SpecGroup[]>(specsToGroups(product?.specs));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -56,6 +65,15 @@ export function ProductForm({ product, categories, brands }: ProductFormProps) {
           conditionNotes: form.conditionNotes || undefined,
           batteryHealth: form.batteryHealth ? Number(form.batteryHealth) : undefined,
         }),
+        releaseYear: form.releaseYear ? Number(form.releaseYear) : undefined,
+        modelName: form.modelName || undefined,
+        mpn: form.mpn || undefined,
+        warrantyMonths: form.warrantyMonths ? Number(form.warrantyMonths) : undefined,
+        weightGrams: form.weightGrams ? Number(form.weightGrams) : undefined,
+        highlights: form.highlights
+          ? String(form.highlights).split('\n').map((h: string) => h.trim()).filter(Boolean)
+          : undefined,
+        specs: groupsToSpecs(specGroups),
       };
 
       if (!isEdit) {
@@ -179,6 +197,41 @@ export function ProductForm({ product, categories, brands }: ProductFormProps) {
           </div>
         </div>
       )}
+
+      {/* Details & specs */}
+      <div className="border border-line rounded-lg p-4 space-y-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted">Details &amp; specs</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {[
+            { key: 'releaseYear', label: 'Release year', placeholder: '2024' },
+            { key: 'modelName', label: 'Model name', placeholder: 'iPhone 15 Pro' },
+            { key: 'mpn', label: 'MPN / part no.', placeholder: 'MU7E3' },
+            { key: 'warrantyMonths', label: 'Warranty (months)', placeholder: '12' },
+            { key: 'weightGrams', label: 'Weight (grams)', placeholder: '221' },
+          ].map(({ key, label, placeholder }) => (
+            <div key={key} className="space-y-1">
+              <label className="text-xs text-muted">{label}</label>
+              <input
+                value={form[key as keyof typeof form] as string}
+                onChange={(e) => set(key, e.target.value)}
+                placeholder={placeholder}
+                className="w-full border border-line rounded px-3 py-2 text-sm focus:outline-none focus:border-accent"
+              />
+            </div>
+          ))}
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted">Highlights (one per line)</label>
+          <textarea
+            value={form.highlights}
+            onChange={(e) => set('highlights', e.target.value)}
+            rows={3}
+            placeholder={'Titanium design\nA17 Pro chip\n5x telephoto camera'}
+            className="w-full border border-line rounded px-3 py-2 text-sm focus:outline-none focus:border-accent"
+          />
+        </div>
+        <SpecsEditor value={specGroups} onChange={setSpecGroups} />
+      </div>
 
       {/* First variant (new products only) */}
       {!isEdit && (

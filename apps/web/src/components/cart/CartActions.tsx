@@ -31,7 +31,7 @@ export function CartActions({ variantId, quantity }: CartActionsProps) {
       <button
         onClick={() => update(quantity - 1)}
         disabled={loading}
-        className="w-7 h-7 flex items-center justify-center rounded border border-line hover:bg-white/5 text-fg transition-colors disabled:opacity-40"
+        className="w-7 h-7 flex items-center justify-center rounded border border-line hover:bg-fg/5 text-fg transition-colors disabled:opacity-40"
         aria-label="Decrease"
       >
         −
@@ -40,7 +40,7 @@ export function CartActions({ variantId, quantity }: CartActionsProps) {
       <button
         onClick={() => update(quantity + 1)}
         disabled={loading}
-        className="w-7 h-7 flex items-center justify-center rounded border border-line hover:bg-white/5 text-fg transition-colors disabled:opacity-40"
+        className="w-7 h-7 flex items-center justify-center rounded border border-line hover:bg-fg/5 text-fg transition-colors disabled:opacity-40"
         aria-label="Increase"
       >
         +

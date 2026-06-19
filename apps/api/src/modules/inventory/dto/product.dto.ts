@@ -1,5 +1,5 @@
 import {
-  IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested,
+  IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsObject, IsOptional, IsString, Min, ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -27,6 +27,13 @@ export class CreateProductDto {
   @IsOptional() @IsIn(['A', 'B', 'C']) grade?: 'A' | 'B' | 'C';
   @IsOptional() @IsString() conditionNotes?: string;
   @IsOptional() @IsInt() @Min(0) batteryHealth?: number;
+  @IsOptional() @IsInt() releaseYear?: number;
+  @IsOptional() @IsString() modelName?: string;
+  @IsOptional() @IsString() mpn?: string;
+  @IsOptional() @IsInt() @Min(0) warrantyMonths?: number;
+  @IsOptional() @IsInt() @Min(0) weightGrams?: number;
+  @IsOptional() @IsArray() @IsString({ each: true }) highlights?: string[];
+  @IsOptional() @IsObject() specs?: Record<string, unknown>;
   @IsOptional() @IsBoolean() isPublished?: boolean;
   @IsArray() @ValidateNested({ each: true }) @Type(() => VariantDto) variants: VariantDto[];
 }
@@ -44,6 +51,13 @@ export class UpdateProductDto {
   @IsOptional() @IsIn(['A', 'B', 'C']) grade?: 'A' | 'B' | 'C';
   @IsOptional() @IsString() conditionNotes?: string;
   @IsOptional() @IsInt() @Min(0) batteryHealth?: number;
+  @IsOptional() @IsInt() releaseYear?: number;
+  @IsOptional() @IsString() modelName?: string;
+  @IsOptional() @IsString() mpn?: string;
+  @IsOptional() @IsInt() @Min(0) warrantyMonths?: number;
+  @IsOptional() @IsInt() @Min(0) weightGrams?: number;
+  @IsOptional() @IsArray() @IsString({ each: true }) highlights?: string[];
+  @IsOptional() @IsObject() specs?: Record<string, unknown>;
   @IsOptional() @IsBoolean() isPublished?: boolean;
 }
 

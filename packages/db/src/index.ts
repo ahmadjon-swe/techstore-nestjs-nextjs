@@ -14,5 +14,7 @@ export type {
   OrderItem,
   Payment,
   RefreshToken,
+  WishlistItem,
+  OtpCode,
 } from '@prisma/client';
-export { Role, Condition, UsedGrade, OrderStatus, PaymentProvider, PaymentStatus } from '@prisma/client';
+export { Role, Condition, UsedGrade, OrderStatus, PaymentProvider, PaymentStatus, OtpType } from '@prisma/client';

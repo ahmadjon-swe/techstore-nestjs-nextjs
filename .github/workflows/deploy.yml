@@ -58,6 +58,9 @@ jobs:
           push: true
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_DEV_MODE=${{ secrets.NEXT_PUBLIC_DEV_MODE }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:${{ steps.vars.outputs.sha_short }}
@@ -70,14 +73,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Copy compose file to VPS
+      - name: Copy compose + nginx config to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: 'docker-compose.prod.yml,nginx/'
-          target: '/srv/techstore'
+          target: '/opt/techstore'
 
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v1
@@ -87,32 +90,39 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             set -e
-            cd /srv/techstore
+            cd /opt/techstore
+
+            SHA=${{ needs.build-push.outputs.sha_short }}
+            API_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${SHA}
+            WEB_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:${SHA}
 
             # Pull new images
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.build-push.outputs.sha_short }}
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:${{ needs.build-push.outputs.sha_short }}
+            docker pull ${API_IMAGE}
+            docker pull ${WEB_IMAGE}
 
-            # Tag as latest
-            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.build-push.outputs.sha_short }} techstore-api:deploy
-            docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-web:${{ needs.build-push.outputs.sha_short }} techstore-web:deploy
+            # Tag for docker-compose.prod.yml (compose picks these up via image: field)
+            docker tag ${API_IMAGE} techstore-api:deploy
+            docker tag ${WEB_IMAGE} techstore-web:deploy
 
-            # Run migrations before swapping containers
+            # 1. Bring up the database first and wait for it to be healthy
+            docker compose -f docker-compose.prod.yml up -d db
+            docker compose -f docker-compose.prod.yml wait db
+
+            # 2. Run DB migrations inside a one-shot API container
+            #    (prisma is in dependencies, so it's present in the production image)
             docker run --rm \
-              --env-file /srv/techstore/.env.production \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api:${{ needs.build-push.outputs.sha_short }} \
-              node -e "require('@techstore/db').prisma.migrate.deploy()" \
-              || \
-              docker compose -f docker-compose.prod.yml run --rm api \
-                pnpm --filter @techstore/db migrate:deploy
+              --env-file /opt/techstore/.env.production \
+              --network techstore-network \
+              ${API_IMAGE} \
+              pnpm --filter @techstore/db migrate:deploy
 
-            # Swap with zero-downtime (rolling update via docker compose)
-            docker compose -f docker-compose.prod.yml up -d --build --wait --no-build \
-              --pull never
+            # 3. Start / update remaining services with the new images
+            docker compose -f docker-compose.prod.yml up -d --no-build --pull never
 
-            # Health check
+            # 4. Health check through nginx (port 3110) — API port 4000 is internal only
             sleep 5
-            curl -fsk http://127.0.0.1:4000/api/health || (docker compose -f docker-compose.prod.yml logs api && exit 1)
+            curl -fsS http://127.0.0.1:3110/api/health \
+              || (docker compose -f docker-compose.prod.yml logs api && exit 1)
 
-            # Prune old images
+            # 5. Prune old images to free disk space
             docker image prune -f

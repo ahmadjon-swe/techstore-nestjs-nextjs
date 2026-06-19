@@ -94,6 +94,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  async notifyOrderCancelled(orderNumber: string) {
+    if (!this.bot || !this.adminChatId) return;
+    try {
+      await this.bot.telegram.sendMessage(
+        this.adminChatId,
+        `❌ Order <b>${orderNumber}</b> was cancelled by the customer`,
+        { parse_mode: 'HTML' },
+      );
+    } catch (err) {
+      this.logger.warn('Failed to send admin alert', err);
+    }
+  }
+
   // ── Private: register all handlers ────────────────────────────────────────
 
   private registerHandlers(bot: Telegraf<BotContext>) {

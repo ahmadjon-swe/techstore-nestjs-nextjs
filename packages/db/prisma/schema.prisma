@@ -17,20 +17,24 @@ enum Role {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  phone        String?   @unique
-  email        String?   @unique
-  passwordHash String?
-  name         String?
-  role         Role      @default(CUSTOMER)
-  telegramId   BigInt?   @unique
-  locale       String    @default("uz")
-  addresses    Address[]
-  orders       Order[]
-  cart         Cart?
-  reviews      Review[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id            String          @id @default(cuid())
+  phone         String?         @unique
+  email         String?         @unique
+  passwordHash  String?
+  name          String?
+  role          Role            @default(CUSTOMER)
+  googleId      String?         @unique
+  telegramId    BigInt?         @unique
+  locale        String          @default("uz")
+  deletedAt     DateTime?
+  addresses     Address[]
+  orders        Order[]
+  cart          Cart?
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  otpCodes      OtpCode[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@map("users")
 }
@@ -46,8 +50,41 @@ model Address {
   region    String?
   notes     String?
   isDefault Boolean @default(false)
+  lat       Float?
+  lng       Float?
 
   @@map("addresses")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+enum OtpType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+  PHONE_VERIFY
+}
+
+model OtpCode {
+  id        String    @id @default(cuid())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  code      String
+  type      OtpType
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("otp_codes")
 }
 
 model RefreshToken {
@@ -114,10 +151,18 @@ model Product {
   grade          UsedGrade?
   conditionNotes String?
   batteryHealth  Int?
+  releaseYear    Int?
+  modelName      String?
+  mpn            String?
+  warrantyMonths Int?
+  weightGrams    Int?
+  highlights     String[]         @default([])
+  specs          Json?
   isPublished    Boolean          @default(false)
   variants       ProductVariant[]
   images         ProductImage[]
   reviews        Review[]
+  wishlistItems  WishlistItem[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 

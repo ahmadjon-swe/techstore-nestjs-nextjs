@@ -22,6 +22,10 @@ CMD ["pnpm", "--filter", "@techstore/web", "dev"]
 # ---- build ----
 FROM deps AS builder
 COPY . .
+# NEXT_PUBLIC_API_URL is baked into the JS bundle at build time
+# so next.config.ts can add the production domain to remotePatterns.
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN pnpm --filter @techstore/web build
 
 # ---- production ----

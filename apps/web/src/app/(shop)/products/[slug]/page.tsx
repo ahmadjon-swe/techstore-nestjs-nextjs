@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { Star, ChevronRight } from 'lucide-react';
-import { catalog, ProductDetail } from '@/lib/api';
+import Script from 'next/script';
+import { catalog, ProductDetail, type ProductSummary } from '@/lib/api';
 import { ProductDetailClient } from '@/components/product/ProductDetailClient';
-import { Reveal } from '@/components/motion/Reveal';
+import { ProductBreadcrumb, ProductReviews } from '@/components/product/ProductMeta';
+import { ProductRail } from '@/components/product/ProductRail';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
@@ -66,66 +66,34 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const avg =
-    product.reviews.length > 0
-      ? product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length
-      : null;
+  const related: ProductSummary[] = await catalog.related(slug).catch(() => []);
 
   return (
     <>
-      <script
+      <Script
+        id="product-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        {/* Breadcrumb */}
-        <nav className="mb-8 flex items-center gap-1.5 text-xs text-faint">
-          <Link href="/" className="hover:text-fg">Home</Link>
-          <ChevronRight className="h-3 w-3" />
-          <Link href="/catalog" className="hover:text-fg">Catalog</Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-muted">{product.titleEn}</span>
-        </nav>
+        <ProductBreadcrumb title={product.titleEn} />
 
         <ProductDetailClient product={product} />
 
-        {/* Reviews */}
-        {product.reviews.length > 0 && (
-          <Reveal as="section" className="mt-20 border-t border-line pt-12">
-            <div className="mb-8 flex items-baseline gap-3">
-              <h2 className="font-display text-2xl tracking-tight">Reviews</h2>
-              {avg != null && (
-                <span className="flex items-center gap-1 text-sm text-muted">
-                  <Star className="h-4 w-4 fill-warning text-warning" />
-                  <strong className="text-fg">{avg.toFixed(1)}</strong> · {product.reviews.length}
-                </span>
-              )}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {product.reviews.map((r) => (
-                <div key={r.id} className="rounded-2xl border border-line bg-surface/40 p-5">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium">{r.user?.name ?? 'Anonymous'}</span>
-                    <span className="text-xs text-faint">
-                      {new Date(r.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="mb-2 flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-3.5 w-3.5 ${i < r.rating ? 'fill-warning text-warning' : 'fill-line text-line'}`}
-                      />
-                    ))}
-                  </div>
-                  {r.body && <p className="text-sm leading-relaxed text-muted">{r.body}</p>}
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        )}
+        <ProductReviews reviews={product.reviews} />
       </div>
+
+      {/* Related products */}
+      {related.length > 0 && (
+        <div className="border-t border-line">
+          <ProductRail
+            title="detail.related"
+            eyebrowKey="detail.related.eyebrow"
+            products={related.slice(0, 4)}
+          />
+        </div>
+      )}
     </>
   );
 }

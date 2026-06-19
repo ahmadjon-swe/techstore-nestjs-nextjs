@@ -16,7 +16,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: data.message ?? 'Login failed' }, { status: upstream.status });
   }
 
-  const res = NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true, role: roleFromJwt(data.accessToken) });
   setAuthCookies(res, data.accessToken, data.refreshToken);
   return res;
+}
+
+/** Decode the role claim from a JWT access token (no verification needed here — just routing). */
+function roleFromJwt(token?: string): string | null {
+  try {
+    const payload = token?.split('.')[1];
+    if (!payload) return null;
+    const json = Buffer.from(payload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+    return JSON.parse(json).role ?? null;
+  } catch {
+    return null;
+  }
 }

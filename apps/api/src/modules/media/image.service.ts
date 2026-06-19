@@ -18,6 +18,12 @@ export class ImageService {
     return `${this.apiUrl}/uploads/${filename}`;
   }
 
+  async saveFromBuffer(filename: string, buffer: Buffer): Promise<string> {
+    const fullPath = path.join(this.uploadDir, filename);
+    await fs.promises.writeFile(fullPath, buffer);
+    return this.urlFromFilename(filename);
+  }
+
   async deleteByUrl(url: string): Promise<void> {
     const filename = path.basename(url);
     const fullPath = path.join(this.uploadDir, filename);

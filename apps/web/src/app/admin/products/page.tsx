@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { requireAuth } from '@/lib/auth';
+import { users as usersApi } from '@/lib/api';
 import { adminApi } from '@/lib/admin-api';
 import { formatPrice } from '@/lib/utils';
 import { ConditionBadge } from '@/components/product/ConditionBadge';
@@ -10,15 +11,21 @@ export const metadata: Metadata = { title: 'Products — Admin' };
 
 export default async function AdminProductsPage() {
   const token = await requireAuth();
-  const { items } = await adminApi.listInventoryProducts(token);
+  const [me, { items }] = await Promise.all([
+    usersApi.profile(token),
+    adminApi.listInventoryProducts(token),
+  ]);
+  const canEdit = ['OWNER', 'MANAGER'].includes(me.role);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl text-fg">Products</h1>
-        <Link href="/admin/products/new" className="bg-elevated text-fg px-4 py-2 rounded text-sm hover:bg-elevated transition-colors">
-          + New product
-        </Link>
+        {canEdit && (
+          <Link href="/admin/products/new" className="bg-elevated text-fg px-4 py-2 rounded text-sm hover:bg-elevated transition-colors">
+            + New product
+          </Link>
+        )}
       </div>
 
       <div className="bg-surface border border-line rounded-lg overflow-hidden">
@@ -55,7 +62,9 @@ export default async function AdminProductsPage() {
                     <AdminPublishToggle productId={p.id} published={p.isPublished} />
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/products/${p.id}`} className="text-accent text-xs hover:underline">Edit</Link>
+                    <Link href={`/admin/products/${p.id}`} className="text-accent text-xs hover:underline">
+                      {canEdit ? 'Edit' : 'View'}
+                    </Link>
                   </td>
                 </tr>
               );

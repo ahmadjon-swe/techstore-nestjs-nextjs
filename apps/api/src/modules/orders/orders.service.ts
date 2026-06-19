@@ -22,6 +22,12 @@ export class OrdersService {
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto, source = 'web') {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.phone) {
+      throw new BadRequestException('PHONE_REQUIRED');
+    }
+
     const cart = await this.prisma.cart.findUnique({
       where: { userId },
       include: { items: { include: { variant: { include: { product: true } } } } },
@@ -118,6 +124,27 @@ export class OrdersService {
       }),
     ]);
     return { total, page, limit, items };
+  }
+
+  /** Customer-initiated cancellation — only allowed before the order is paid/shipped. */
+  async cancelOrder(orderId: string, userId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.userId !== userId) throw new ForbiddenException();
+
+    const cancellable: OrderStatus[] = [OrderStatus.PENDING];
+    if (!cancellable.includes(order.status)) {
+      throw new BadRequestException(
+        `Order cannot be cancelled once it is ${order.status.toLowerCase()}. Contact support.`,
+      );
+    }
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: OrderStatus.CANCELLED },
+    });
+    await this.telegram.notifyOrderCancelled(order.number);
+    return updated;
   }
 
   async updateStatus(orderId: string, dto: UpdateOrderStatusDto, actorRole: Role) {

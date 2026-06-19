@@ -12,6 +12,8 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { TelegramModule } from './modules/telegram/telegram.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
+import { OtpModule } from './modules/otp/otp.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -30,6 +32,8 @@ import { AppService } from './app.service';
     PaymentsModule,
     AdminModule,
     TelegramModule,
+    WishlistModule,
+    OtpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

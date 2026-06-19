@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { Providers } from '@/components/providers';
 
@@ -25,9 +26,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#06070b',
-  colorScheme: 'dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#06070b' },
+    { media: '(prefers-color-scheme: light)', color: '#f5f7fb' },
+  ],
 };
+
+// Set the theme class before first paint to avoid a flash of the wrong palette.
+const THEME_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem('techstore-prefs')||'{}');var t=p&&p.state&&p.state.theme;if(t==='light')document.documentElement.classList.add('light');}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -36,7 +42,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrains.variable} h-full`}
       suppressHydrationWarning
     >
+      <head />
       <body className="grain min-h-full flex flex-col antialiased">
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
