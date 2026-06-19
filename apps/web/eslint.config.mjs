@@ -13,6 +13,16 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // API responses are untyped; relax until proper types are added
+      "@typescript-eslint/no-explicit-any": "warn",
+      // Apostrophes in UI copy don't need HTML escaping in JSX
+      "react/no-unescaped-entities": "off",
+      // Patterns like setMounted(true) and syncing URL → state are intentional
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

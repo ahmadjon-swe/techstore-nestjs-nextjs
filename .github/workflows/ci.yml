@@ -58,6 +58,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
+      - name: Build @techstore/db
+        run: pnpm --filter @techstore/db build
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
       - name: Run tests
         run: pnpm --filter @techstore/api test
 
