@@ -4,7 +4,7 @@ import path from 'path';
 // Build the list of allowed image origins dynamically so production images load.
 // In dev this is localhost:4000; in production it's whatever NEXT_PUBLIC_API_URL points to.
 function buildRemotePatterns() {
-  const patterns: NextConfig['images']['remotePatterns'] = [
+  const patterns: NonNullable<NonNullable<NextConfig['images']>['remotePatterns']> = [
     // Local dev — API uploads
     { protocol: 'http', hostname: 'localhost', port: '4000', pathname: '/uploads/**' },
     // Local dev — MinIO object storage
