@@ -9,7 +9,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { extname } from 'path';
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'crypto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ImageService } from './image.service';
@@ -41,7 +41,7 @@ export class MediaController {
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('File is required');
 
-    const filename = `${uuid()}${extname(file.originalname)}`;
+    const filename = `${randomUUID()}${extname(file.originalname)}`;
 
     if (this.minioService.isEnabled()) {
       const url = await this.minioService.upload(filename, file.buffer, file.mimetype);

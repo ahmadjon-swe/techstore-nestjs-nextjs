@@ -3,13 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { m, AnimatePresence } from 'framer-motion';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCartUI } from '@/store/cart';
 import { formatPrice } from '@/lib/utils';
-import { useT, localized } from '@/lib/i18n';
-import { Button } from '@/components/ui/Button';
+import { useT } from '@/lib/i18n';
 import { ProductCard } from '@/components/product/ProductCard';
 import type { Cart, ProductSummary } from '@/lib/api';
 
@@ -18,7 +16,6 @@ const img = (u?: string) => (u ? (u.startsWith('http') ? u : `${API_URL}${u}`) :
 
 export default function CartPage() {
   const { t, locale } = useT();
-  const router = useRouter();
   const setCount = useCartUI((s) => s.setCount);
 
   const [cart, setCart] = useState<Cart | null>(null);
