@@ -55,7 +55,7 @@ jobs:
             ghcr.io/${{ github.repository }}-web:${{ github.sha }}
 
       - name: Sync compose file to VPS
-        uses: appleboy/scp-action@v0
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
