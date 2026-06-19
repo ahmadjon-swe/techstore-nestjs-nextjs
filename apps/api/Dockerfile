@@ -26,9 +26,9 @@ RUN pnpm --filter @techstore/db db:generate
 RUN pnpm --filter @techstore/api build
 
 # ---- production ----
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 # tini = proper PID 1 (signal handling / zombie reaping); curl for HEALTHCHECK
-RUN apk add --no-cache tini curl && npm i -g pnpm
+RUN apk add --no-cache tini curl && corepack enable && corepack prepare pnpm@11.6.0 --activate
 WORKDIR /app
 ENV NODE_ENV=production
 
