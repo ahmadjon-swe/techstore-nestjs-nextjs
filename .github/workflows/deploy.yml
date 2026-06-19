@@ -54,13 +54,13 @@ jobs:
             ghcr.io/${{ github.repository }}-web:latest
             ghcr.io/${{ github.repository }}-web:${{ github.sha }}
 
-      - name: Sync compose file to VPS
+      - name: Sync config files to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: docker-compose.prod.yml
+          source: "docker-compose.prod.yml,nginx/"
           target: /opt/techstore/
 
       - name: Deploy via SSH
@@ -78,10 +78,20 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}-api:latest
             docker pull ghcr.io/${{ github.repository }}-web:latest
 
-            docker compose -f docker-compose.prod.yml up -d --no-deps --no-build api web nginx
+            # No --no-deps: Compose respects depends_on so DB starts/stays healthy
+            # before API, which needs it for the entrypoint migration.
+            docker compose -f docker-compose.prod.yml up -d --no-build api web nginx
 
-            sleep 15
-            curl -fsS http://127.0.0.1:3110/api/health \
-              || (docker compose -f docker-compose.prod.yml logs --tail 50 api && exit 1)
+            # Wait up to 120s for the stack to be reachable.
+            for i in $(seq 1 24); do
+              if curl -fsS http://127.0.0.1:3110/api/health 2>/dev/null; then
+                break
+              fi
+              if [ "$i" = "24" ]; then
+                docker compose -f docker-compose.prod.yml logs --tail 80 api
+                exit 1
+              fi
+              sleep 5
+            done
 
             docker image prune -f

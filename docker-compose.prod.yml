@@ -1,5 +1,3 @@
-version: '3.9'
-
 # VPS deployment — shares the host with CheckLab (ports 80/443 belong to CheckLab nginx).
 # Tech-store nginx listens on host port 3110 (HTTP only); SSL is terminated by the host proxy.
 # Host proxy must forward techstore.yourdomain.com → 127.0.0.1:3110
