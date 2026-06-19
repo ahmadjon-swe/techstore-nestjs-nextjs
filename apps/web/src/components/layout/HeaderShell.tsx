@@ -75,12 +75,11 @@ export function HeaderShell({
         >
           <div className="mx-auto flex h-14 max-w-7xl items-center px-4 sm:px-6">
             {/* Brand — left */}
-            <Link href="/" className="group flex shrink-0 items-center gap-2">
-              <span className="relative grid h-7 w-7 place-items-center rounded-lg bg-[linear-gradient(135deg,var(--color-accent),var(--color-accent-2))] text-xs font-bold text-white shadow-[0_0_16px_-4px_var(--color-accent)]">
-                T
-                <span className="absolute inset-0 rounded-lg opacity-0 ring-2 ring-accent/50 transition-opacity group-hover:opacity-100" />
-              </span>
-              <span className="font-display text-base font-semibold tracking-tight">TechStore</span>
+            <Link href="/" className="group flex shrink-0 items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/header-logo-dark.svg" alt="TechStore" className="logo-dark h-8 w-auto" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/header-logo-light.svg" alt="TechStore" className="logo-light h-8 w-auto" />
             </Link>
 
             {/* Desktop nav — centered */}

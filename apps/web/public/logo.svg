@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="electric" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+
+    <linearGradient id="dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(180,140)">
+    <!-- Hexagon frame -->
+    <path d="M220 0 L440 125 L440 375 L220 500 L0 375 L0 125 Z"
+          fill="none" stroke="url(#electric)" stroke-width="28"/>
+
+    <!-- Stylized T -->
+    <path d="M90 110 H350 L305 165 H235 V390 L155 440 V165 H45 Z"
+          fill="url(#electric)"/>
+
+    <!-- Negative-space S -->
+    <path d="M350 165
+             C300 165 270 195 270 230
+             C270 265 300 285 350 285
+             C400 285 430 315 430 355
+             C430 410 385 450 315 450
+             H110
+             L155 395
+             H305
+             C340 395 355 380 355 360
+             C355 340 340 325 305 325
+             C230 325 195 285 195 235
+             C195 160 255 110 345 110
+             H435
+             L390 165 Z"
+          fill="url(#dark)"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="800" y="420"
+        font-family="Inter, Arial, Helvetica, sans-serif"
+        font-size="170"
+        font-weight="800"
+        letter-spacing="-4">
+      <tspan fill="#0F172A">Tech</tspan><tspan fill="url(#electric)">Store</tspan>
+  </text>
+
+  <text x="804" y="495"
+        font-family="Inter, Arial, Helvetica, sans-serif"
+        font-size="34"
+        letter-spacing="10"
+        fill="#64748B">
+      NEXT GENERATION TECHNOLOGY COMMERCE
+  </text>
+
+  <!-- Premium underline -->
+  <rect x="620" y="555" width="420" height="10" rx="5" fill="url(#electric)"/>
+</svg>

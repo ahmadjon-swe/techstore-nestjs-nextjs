@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="50%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Premium hexagon -->
+  <path d="M512 110
+           L790 270
+           L790 590
+           L512 750
+           L234 590
+           L234 270 Z"
+        fill="none"
+        stroke="url(#brand)"
+        stroke-width="42"
+        stroke-linejoin="round"/>
+
+  <!-- Stylized T -->
+  <path d="M325 285
+           H700
+           L640 360
+           H560
+           V660
+           L445 725
+           V360
+           H265 Z"
+        fill="url(#brand)"/>
+
+  <!-- Integrated S shape -->
+  <path d="M690 360
+           C620 360 580 400 580 445
+           C580 485 615 515 690 515
+           C780 515 835 565 835 640
+           C835 735 755 805 635 805
+           H350
+           L410 730
+           H625
+           C680 730 715 700 715 655
+           C715 615 680 590 620 590
+           C500 590 430 535 430 445
+           C430 325 530 255 675 255
+           H845
+           L785 360 Z"
+        fill="#0F172A"/>
+</svg>

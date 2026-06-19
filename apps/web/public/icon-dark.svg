@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"></stop>
+      <stop offset="50%" stop-color="#2563EB"></stop>
+      <stop offset="100%" stop-color="#7C3AED"></stop>
+    </linearGradient>
+    <linearGradient id="light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F8FAFC"></stop>
+      <stop offset="100%" stop-color="#CBD5E1"></stop>
+    </linearGradient>
+  </defs>
+
+  
+  <path d="M512 110&#xA;           L790 270&#xA;           L790 590&#xA;           L512 750&#xA;           L234 590&#xA;           L234 270 Z" fill="none" stroke="url(#brand)" stroke-width="42" stroke-linejoin="round"></path>
+
+  
+  <path d="M325 285&#xA;           H700&#xA;           L640 360&#xA;           H560&#xA;           V660&#xA;           L445 725&#xA;           V360&#xA;           H265 Z" fill="url(#brand)"></path>
+
+  
+  <path d="M690 360&#xA;           C620 360 580 400 580 445&#xA;           C580 485 615 515 690 515&#xA;           C780 515 835 565 835 640&#xA;           C835 735 755 805 635 805&#xA;           H350&#xA;           L410 730&#xA;           H625&#xA;           C680 730 715 700 715 655&#xA;           C715 615 680 590 620 590&#xA;           C500 590 430 535 430 445&#xA;           C430 325 530 255 675 255&#xA;           H845&#xA;           L785 360 Z" fill="url(#light)"></path>
+</svg>

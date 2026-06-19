@@ -338,6 +338,12 @@ a, button, [role="button"], summary, .smooth {
               opacity var(--dur-fast) var(--ease-out);
 }
 
+/* ----------------------------------- logo theme switching (CSS-only) ------- */
+/* Dark mode (default): show dark-mode icon; light mode: show light icon */
+.logo-light { display: none; }
+.light .logo-light { display: block; }
+.light .logo-dark  { display: none; }
+
 /* --------------------------------------------------- reduced motion ------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
