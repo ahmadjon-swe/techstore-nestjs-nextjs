@@ -73,6 +73,9 @@ jobs:
             set -e
             cd /opt/techstore
 
+            # Ensure the shared proxy network exists (CheckLab's nginx uses it to reach techstore-nginx-1)
+            docker network create proxy-network 2>/dev/null || true
+
             # Preflight: fail fast with a readable message instead of a cryptic
             # compose error if the server was never bootstrapped.
             test -f /opt/techstore/.env || { echo "::error::/opt/techstore/.env missing — run scripts/vps-bootstrap.sh on the VPS"; exit 1; }

@@ -88,6 +88,7 @@ services:
     restart: unless-stopped
     networks:
       - techstore-network
+      - proxy-network
 
 volumes:
   techstore_db_data:
@@ -96,3 +97,5 @@ volumes:
 networks:
   techstore-network:
     driver: bridge
+  proxy-network:
+    external: true
