@@ -44,6 +44,9 @@ USER node
 
 EXPOSE 3000
 ENV PORT=3000
+# Next.js standalone binds to $HOSTNAME, which Docker sets to the container ID —
+# so localhost (and the HEALTHCHECK below) wouldn't reach it. Force 0.0.0.0.
+ENV HOSTNAME=0.0.0.0
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD curl -fsS http://localhost:3000 || exit 1
 
