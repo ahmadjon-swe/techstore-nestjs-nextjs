@@ -25,10 +25,10 @@ export class ClickProvider implements PaymentProvider {
   }
 
   async verifyCallback(payload: Record<string, unknown>) {
-    const orderId = String(payload['merchant_trans_id'] ?? '');
-    const providerRef = String(payload['click_trans_id'] ?? '');
-    const signTime = String(payload['sign_time'] ?? '');
-    const signString = String(payload['sign_string'] ?? '');
+    const orderId = (payload['merchant_trans_id'] as string | undefined) ?? '';
+    const providerRef = (payload['click_trans_id'] as string | undefined) ?? '';
+    const signTime = (payload['sign_time'] as string | undefined) ?? '';
+    const signString = (payload['sign_string'] as string | undefined) ?? '';
 
     const hash = crypto
       .createHash('md5')

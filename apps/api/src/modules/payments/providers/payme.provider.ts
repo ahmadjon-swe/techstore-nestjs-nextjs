@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
 import { PaymentProvider, PaymentInitResult } from './payment-provider.interface';
 
 // Payme uses UZS tiyin (1 UZS = 100 tiyin) for API amounts
@@ -28,9 +27,9 @@ export class PaymeProvider implements PaymentProvider {
     const { method, params } = payload as { method: string; params: Record<string, unknown> };
     const account = params?.account as Record<string, string> | undefined;
     const orderId = account?.order_id ?? '';
-    const providerRef = String(params?.id ?? '');
+    const providerRef = (params?.id as string | undefined) ?? '';
 
-    const authHeader = String(payload['_auth'] ?? '');
+    const authHeader = (payload['_auth'] as string | undefined) ?? '';
     const expected = `Basic ${Buffer.from(`Paycom:${this.key}`).toString('base64')}`;
     if (authHeader !== expected) {
       this.logger.warn(`Payme auth mismatch for order ${orderId}`);

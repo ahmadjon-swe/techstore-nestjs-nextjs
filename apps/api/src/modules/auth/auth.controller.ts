@@ -39,7 +39,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Body('refreshToken') token: string, @CurrentUser() _user: any) {
+  logout(@Body('refreshToken') token: string) {
     return this.authService.logout(token);
   }
 

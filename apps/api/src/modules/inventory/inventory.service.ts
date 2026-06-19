@@ -69,7 +69,7 @@ export class InventoryService {
   }
 
   async deleteProduct(id: string) {
-    const p = await this.getProduct(id);
+    await this.getProduct(id);
     for (const img of await this.prisma.productImage.findMany({ where: { productId: id } })) {
       await this.imageService.deleteByUrl(img.url);
     }
