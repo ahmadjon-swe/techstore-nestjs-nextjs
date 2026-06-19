@@ -5,8 +5,8 @@ on:
     branches: [main]
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: '24'
+  PNPM_VERSION: '11'
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository_owner }}/techstore
 
