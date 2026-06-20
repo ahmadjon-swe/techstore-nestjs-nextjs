@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { clearAuthCookies } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API_URL = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 export async function POST(_req: NextRequest) {
   const store = await cookies();
