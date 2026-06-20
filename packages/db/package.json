@@ -17,21 +17,22 @@
     "generate": "prisma generate",
     "studio": "prisma studio",
     "seed": "ts-node --project tsconfig.json prisma/seed.ts",
-    "seed:prod": "NODE_ENV=development ts-node --project tsconfig.json prisma/seed.ts",
+    "build:seeds": "tsc --outDir dist --module CommonJS --target ES2022 --esModuleInterop true --skipLibCheck true prisma/seed.ts prisma/seed-demo.ts prisma/seed-images.ts",
+    "seed:prod": "NODE_ENV=development node dist/seed.js",
     "seed:demo": "ts-node --project tsconfig.json prisma/seed-demo.ts",
-    "seed:demo:prod": "NODE_ENV=development ts-node --project tsconfig.json prisma/seed-demo.ts",
+    "seed:demo:prod": "NODE_ENV=development node dist/seed-demo.js",
     "seed:images": "ts-node --project tsconfig.json prisma/seed-images.ts",
     "db:generate": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
+    "dotenv": "^16.4.5",
     "prisma": "^6.19.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^25.9.3",
-    "dotenv": "^16.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

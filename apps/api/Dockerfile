@@ -25,6 +25,7 @@ COPY . .
 RUN pnpm --filter @techstore/db db:generate
 RUN pnpm --filter @techstore/types build
 RUN pnpm --filter @techstore/db build
+RUN pnpm --filter @techstore/db build:seeds
 RUN pnpm --filter @techstore/api build
 
 # ---- production ----
