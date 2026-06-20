@@ -9,6 +9,8 @@ function buildRemotePatterns() {
     { protocol: 'http', hostname: 'localhost', port: '4000', pathname: '/uploads/**' },
     // Local dev — MinIO object storage
     { protocol: 'http', hostname: 'localhost', port: '9000', pathname: '/**' },
+    // Demo product images (picsum placeholder URLs used by seed-demo.ts)
+    { protocol: 'https', hostname: 'picsum.photos' },
   ];
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;

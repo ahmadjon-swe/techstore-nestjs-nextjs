@@ -561,12 +561,14 @@ async function main() {
       specs: (p.details?.specs ?? undefined) as object | undefined,
       isPublished: true,
     };
+    const imageData = [{ url: `https://picsum.photos/seed/${p.slug}/600/600`, alt: null, position: 0 }];
     await prisma.product.upsert({
       where: { slug: p.slug },
-      update: scalar,
+      update: { ...scalar, images: { deleteMany: {}, create: imageData } },
       create: {
         slug: p.slug,
         ...scalar,
+        images: { create: imageData },
         variants: {
           create: p.variants.map((v) => ({
             sku: v.sku, storage: v.storage ?? null, color: v.color ?? null,
