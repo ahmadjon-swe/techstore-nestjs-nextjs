@@ -41,6 +41,11 @@ async function main() {
     return;
   }
 
+  // Wipe products first so variant SKUs never conflict on re-runs.
+  // Categories, brands, and users are upserted (not wiped) to preserve any
+  // manually created data outside the demo set.
+  await prisma.product.deleteMany({});
+
   // ── Root (hidden) ───────────────────────────────────────────────────────────
   const root = await prisma.category.upsert({
     where: { slug: 'electronics' },
